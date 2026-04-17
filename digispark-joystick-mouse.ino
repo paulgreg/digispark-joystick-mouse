@@ -16,8 +16,8 @@ void loop() {
   int Y = analogRead(pinY);
 
   // Center joystick around 512, scale movement
-  int moveX = map(X, 0, 1023, 10, -10);
-  int moveY = map(Y, 0, 1023, -10, 10);
+  int moveX = map(X, 0, 1023, 12, -12);
+  int moveY = map(Y, 0, 1023, -12, 12);
 
   // Deadzone (avoid drift)
   if (abs(moveX) < 2) moveX = 0;
