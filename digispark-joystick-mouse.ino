@@ -1,36 +1,74 @@
 #include <DigiMouse.h>
 
-#define pinX   A0
-#define pinY   A1
-#define pinBtn  0
+#define PIN_X    A0
+#define PIN_Y    A1
+#define PIN_BTN  0
+
+// Adjust after calibration if necessary
+const int CENTER_X = 512;
+const int CENTER_Y = 512;
+
+// Dead zone around the center
+const int DEADZONE = 50;
+
+// Maximum cursor speed
+const float MAX_SPEED = 8.0;
+
+// Cursor accumulators (fractional pixels)
+float accX = 0.0;
+float accY = 0.0;
 
 void setup() {
-  pinMode(pinBtn, INPUT_PULLUP);
-  pinMode(pinX, INPUT);
-  pinMode(pinY, INPUT);
+  pinMode(PIN_BTN, INPUT_PULLUP);
   DigiMouse.begin();
 }
- 
+
 void loop() {
-  int X = analogRead(pinX); // 0–1023
-  int Y = analogRead(pinY);
 
-  // Center joystick around 512, scale movement
-  int moveX = map(X, 0, 1023, 12, -12);
-  int moveY = map(Y, 0, 1023, -12, 12);
+  int rawX = analogRead(PIN_X);
+  int rawY = analogRead(PIN_Y);
 
-  // Deadzone (avoid drift)
-  if (abs(moveX) < 2) moveX = 0;
-  if (abs(moveY) < 2) moveY = 0;
+  int dx = rawX - CENTER_X;
+  int dy = rawY - CENTER_Y;
 
-  // Move mouse
+  float speedX = 0.0;
+  float speedY = 0.0;
+
+  // ----- X axis -----
+  if (abs(dx) > DEADZONE) {
+    float amount = (float)(abs(dx) - DEADZONE) / (512.0 - DEADZONE);
+    speedX = amount * amount * MAX_SPEED;   // quadratic response
+
+    if (dx > 0)
+      speedX = -speedX;   // Reverse X if needed
+  }
+
+  // ----- Y axis -----
+  if (abs(dy) > DEADZONE) {
+    float amount = (float)(abs(dy) - DEADZONE) / (512.0 - DEADZONE);
+    speedY = amount * amount * MAX_SPEED;
+
+    if (dy < 0)
+      speedY = -speedY;
+  }
+
+  // Accumulate fractional movement
+  accX += speedX;
+  accY += speedY;
+
+  int moveX = (int)accX;
+  int moveY = (int)accY;
+
+  accX -= moveX;
+  accY -= moveY;
+
   DigiMouse.move(moveX, moveY, 0);
 
-  // Button click
-  if (digitalRead(pinBtn) == LOW) {  // active LOW
-    DigiMouse.setButtons(1 << 0); // left click
-  } else {
-    DigiMouse.setButtons(0); // release
-  }
-  DigiMouse.delay(20);
+  // Left button
+  if (digitalRead(PIN_BTN) == LOW)
+    DigiMouse.setButtons(1);
+  else
+    DigiMouse.setButtons(0);
+
+  DigiMouse.delay(15);
 }
