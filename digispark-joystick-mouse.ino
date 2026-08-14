@@ -4,6 +4,9 @@
 #define PIN_Y    A1
 #define PIN_BTN  0
 
+#define INVERT_X true
+#define INVERT_Y true
+
 // Adjust after calibration if necessary
 const int CENTER_X = 512;
 const int CENTER_Y = 512;
@@ -39,8 +42,8 @@ void loop() {
     float amount = (float)(abs(dx) - DEADZONE) / (512.0 - DEADZONE);
     speedX = amount * amount * MAX_SPEED;   // quadratic response
 
-    if (dx > 0)
-      speedX = -speedX;   // Reverse X if needed
+    if ((dx > 0) ^ INVERT_X)
+      speedX = -speedX;
   }
 
   // ----- Y axis -----
@@ -48,7 +51,7 @@ void loop() {
     float amount = (float)(abs(dy) - DEADZONE) / (512.0 - DEADZONE);
     speedY = amount * amount * MAX_SPEED;
 
-    if (dy < 0)
+    if ((dy < 0) ^ INVERT_Y)
       speedY = -speedY;
   }
 
