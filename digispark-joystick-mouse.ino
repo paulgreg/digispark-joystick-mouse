@@ -24,9 +24,11 @@ float accY = 0.0;
 void setup() {
   pinMode(PIN_BTN, INPUT_PULLUP);
   DigiMouse.begin();
+  DigiMouse.delay(2000);
 }
 
 void loop() {
+  DigiMouse.update();
 
   int rawX = analogRead(PIN_X);
   int rawY = analogRead(PIN_Y);
