@@ -4,8 +4,8 @@
 #define PIN_Y    A1
 #define PIN_BTN  0
 
-#define INVERT_X true
-#define INVERT_Y true
+#define INVERT_X false
+#define INVERT_Y false
 
 // Adjust after calibration if necessary
 const int CENTER_X = 512;
